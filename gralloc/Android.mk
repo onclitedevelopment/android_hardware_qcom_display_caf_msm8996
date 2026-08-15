@@ -11,14 +11,11 @@ LOCAL_C_INCLUDES              := $(common_includes)
 LOCAL_CFLAGS                  := $(common_flags) -DLOG_TAG=\"qdgralloc\" -Wall -Werror
 LOCAL_SHARED_LIBRARIES        := $(common_libs) libqdMetaData libsync libgrallocutils \
                                  android.hardware.graphics.common@1.1
-ifeq ($(TARGET_KERNEL_VERSION), 4.14)
-LOCAL_C_INCLUDES              += external/libcxx/include \
-                                 system/core/libion/include/ \
-                                 system/core/libion/kernel-headers/ \
-                                 $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include
+# Kernels exporting the new ion abi (TARGET_ION_ABI_VERSION >= 2 in msm_ion.h)
+# make gr_ion_alloc.cpp use the libion userspace api.
+LOCAL_C_INCLUDES              += system/memory/libion/include \
+                                 system/memory/libion/kernel-headers
 LOCAL_SHARED_LIBRARIES        += libion
-LOCAL_CFLAGS                  += -std=c++14
-endif
 LOCAL_HEADER_LIBRARIES        := display_headers
 ifneq ($(TARGET_KERNEL_VERSION), 4.14)
 LOCAL_CFLAGS                  += -isystem  $(kernel_includes)
@@ -42,10 +39,8 @@ LOCAL_MODULE                  := libgrallocutils
 LOCAL_VENDOR_MODULE           := true
 LOCAL_MODULE_TAGS             := optional
 LOCAL_C_INCLUDES              := $(common_includes) $(kernel_includes)
-ifeq ($(TARGET_KERNEL_VERSION), 4.14)
-LOCAL_C_INCLUDES              += system/core/libion/include \
-                                 system/core/libion/kernel-headers
-endif
+LOCAL_C_INCLUDES              += system/memory/libion/include \
+                                 system/memory/libion/kernel-headers
 LOCAL_HEADER_LIBRARIES        := display_headers
 LOCAL_SHARED_LIBRARIES        := $(common_libs) libqdMetaData libdl android.hardware.graphics.common@1.1
 LOCAL_CFLAGS                  := $(common_flags) -DLOG_TAG=\"grallocutils\" -Wno-sign-conversion
